@@ -428,5 +428,10 @@
         "id": 210192,
         "icon": "https://api.ambr.top/assets/UI/namecard/UI_NameCardPic_OST4_P.png",
         "image": "https://api.ambr.top/assets/UI/namecard/UI_NameCardPic_OST4_P.png"
+    },
+    "10000096": {
+        "id": 210195,
+        "icon": "https://api.ambr.top/assets/UI/namecard/UI_NameCardIcon_Arlecchino.png",
+        "image": "https://api.ambr.top/assets/UI/namecard/UI_NameCardPic_Arlecchino_P.png"
     }
 }
