@@ -144,6 +144,7 @@ class ENCard:
         self.save = save
         self.agent = agent
         self.color = color or None
+        self.enc = None
         
         check = check_ENCard_params(self)
         if check is True:
@@ -183,19 +184,19 @@ class ENCard:
                 self.color = await get_color_user(self.color)
             
             async with EnkaNetworkAPI(user_agent = self.agent, lang=self.lang) as client:
-                info = await client.fetch_user(uid)
+                self.enc = await client.fetch_user(uid)
                 
-            character = next(c for c in info.characters if c.id == int(self.character_id))
+            character = next(c for c in self.enc.characters if c.id == int(self.character_id))
             color = self.color.get(str(character.id)) if self.color else None
             character_iamge = self.character_image.get(str(character.id)) if self.character_image else None
-            result = await style_one.Creat(info = character, name = info.player.nickname, translator = self.translator, adapt = self.adapt, hide = self.hide, color = color, art = character_iamge, uid = uid).start()
+            result = await style_one.Creat(info = character, name = self.enc.player.nickname, translator = self.translator, adapt = self.adapt, hide = self.hide, color = color, art = character_iamge, uid = uid).start()
 
             if self.save:
                 await asyncio.gather(*[save_banner(uid, key["card"], key["name"]) for key in result])
 
             data = {
                 "uid": uid,
-                "name": info.player.nickname,
+                "name": self.enc.player.nickname,
                 "lang": self.lang,
                 "card": [result]
             }
