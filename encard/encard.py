@@ -213,7 +213,7 @@ class ENCard:
             if isinstance(self.color, dict):
                 self.color = await get_color_user(self.color)
 
-            character = next(c for c in self.enc.characters if c.id == int(self.character_id))
+            character = next(c for c in self.enc.characters if str(c.id) == str(self.character_id))
             color = self.color.get(str(character.id)) if self.color else None
             character_iamge = (
                 self.character_image.get(str(character.id)) if self.character_image else None
