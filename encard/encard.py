@@ -1,13 +1,13 @@
 from enkanetwork import EnkaNetworkAPI
-import asyncio,os,datetime
+import asyncio, os, datetime
 import random
 
 from .src.teamplate import style_one
-from .src.teamplate  import generation_profile_one
+from .src.teamplate import generation_profile_one
 from .src.tools import translation
 from .src.modal import ENCardResult
 
-        
+
 class InvalidValueError(ValueError):
     pass
 
@@ -23,17 +23,18 @@ def check_UID_and_template(UID, template):
 
     if not isinstance(UID, (str, int)):
         return "The UID must be a string or a number"
-    
+
     if isinstance(UID, str) and not UID.isdigit():
         return "The UID should only contain numbers"
-    
+
     if not isinstance(template, (str, int)):
         return "The template must be a string or a number."
-    
+
     if isinstance(template, str) and not template.isdigit():
         return "The template should only contain numbers."
 
     return True
+
 
 async def get_character_art(character_art):
     processed_dict = {}
@@ -47,6 +48,7 @@ async def get_character_art(character_art):
         return processed_dict
     return None
 
+
 async def get_color_user(color):
     processed_dict = {}
     for key, value in color.items():
@@ -57,6 +59,7 @@ async def get_color_user(color):
     if processed_dict != {}:
         return processed_dict
     return None
+
 
 def check_ENCard_params(parameters):
     """
@@ -73,33 +76,37 @@ def check_ENCard_params(parameters):
 
     if not isinstance(parameters.lang, str):
         raise InvalidValueError("The lang parameter must be a string")
-    
+
     if parameters.lang not in translation.supportLang:
         raise InvalidValueError(f"Invalid value for lang: {parameters.lang}")
-    
+
     if not parameters.character_image is None:
         if not isinstance(parameters.character_image, dict):
             raise InvalidValueError("The character_image parameter must be a dictionary.")
 
         for key, value in parameters.character_image.items():
             if not isinstance(key, str):
-                raise InvalidValueError("The keys in the character_image parameter must be strings.")
+                raise InvalidValueError(
+                    "The keys in the character_image parameter must be strings."
+                )
             if not isinstance(value, (str, str, list)):
-                raise InvalidValueError(f"Invalid value for the key '{key}' in the character_image parameter")
-    
+                raise InvalidValueError(
+                    f"Invalid value for the key '{key}' in the character_image parameter"
+                )
+
     if not parameters.character_id is None:
         if not isinstance(parameters.character_id, str):
             raise InvalidValueError("The character_id parameter must be a string.")
-   
+
     if not isinstance(parameters.adapt, bool):
-       raise InvalidValueError("The parameter adapt must be a Boolean value")
-   
+        raise InvalidValueError("The parameter adapt must be a Boolean value")
+
     if not isinstance(parameters.hide, bool):
-       raise InvalidValueError("The hide parameter must be a boolean value.")
-   
+        raise InvalidValueError("The hide parameter must be a boolean value.")
+
     if not isinstance(parameters.save, bool):
         raise InvalidValueError("The save parameter must be a boolean value.")
-    
+
     if not isinstance(parameters.agent, str):
         raise InvalidValueError("The agent parameter must be a string")
 
@@ -121,8 +128,18 @@ async def save_banner(uid, res, name):
 
 
 class ENCard:
-    def __init__(self, lang="ru", character_image = None, character_id = None, adapt=False,
-                 hide=False, save=False, agent= "Library: 0.0.1_Beta", color = None):
+    def __init__(
+        self,
+        uid,
+        lang="ru",
+        character_image=None,
+        character_id=None,
+        adapt=False,
+        hide=False,
+        save=False,
+        agent="Library: 0.0.1_Beta",
+        color=None,
+    ):
         """
         :param lang: str, What language to receive information supported:  en, ru, vi, th, pt, kr, jp, zh, id, fr, es, de, chs, cht.
         :param character_image: dict, Dictionary: {"character_id_1": "image_link","character_id_2": "image_link",...}.
@@ -135,6 +152,7 @@ class ENCard:
 
         """
 
+        self.uid = uid
         self.lang = lang
         self.translator = translation.Translator(lang)
         self.character_image = character_image or None
@@ -145,7 +163,7 @@ class ENCard:
         self.agent = agent
         self.color = color or None
         self.enc = None
-        
+
         check = check_ENCard_params(self)
         if check is True:
             pass
@@ -153,57 +171,79 @@ class ENCard:
             return check
 
     async def __aenter__(self):
+        async with EnkaNetworkAPI(user_agent=self.agent, lang=self.lang) as client:
+            self.enc = await client.fetch_user(self.uid)
         return self
 
     async def __aexit__(self, *args):
         pass
-    
-    async def create_profile(self, uid, style=1):
-        check = check_UID_and_template(uid, style)
+
+    async def create_profile(self, style=1):
+        check = check_UID_and_template(self.uid, style)
 
         if check is not True:
             return check
         else:
             if style == 1:
-                result = await generation_profile_one.ProfileOne(translation = self.translator,uid = uid, lang = self.lang, characterImgs = self.character_image, characterName = self.character_id, adapt = self.adapt, hide = self.hide, agent = self.agent).start()
+                result = await generation_profile_one.ProfileOne(
+                    translation=self.translator,
+                    uid=self.uid,
+                    lang=self.lang,
+                    characterImgs=self.character_image,
+                    characterName=self.character_id,
+                    adapt=self.adapt,
+                    hide=self.hide,
+                    agent=self.agent,
+                ).start()
         if self.save:
-            await save_banner(uid, result.card, "profile")
+            await save_banner(self.uid, result.card, "profile")
 
         return result
-    
+
     async def create_cards(self, uid, style=1):
+        assert self.enc is not None
         check = check_UID_and_template(uid, style)
-        
+
         if check is not True:
             raise TypeError(check)
         else:
             if isinstance(self.character_image, dict):
                 self.character_image = await get_character_art(self.character_image)
-            
+
             if isinstance(self.color, dict):
                 self.color = await get_color_user(self.color)
-            
-            async with EnkaNetworkAPI(user_agent = self.agent, lang=self.lang) as client:
-                self.enc = await client.fetch_user(uid)
-                
+
             character = next(c for c in self.enc.characters if c.id == int(self.character_id))
             color = self.color.get(str(character.id)) if self.color else None
-            character_iamge = self.character_image.get(str(character.id)) if self.character_image else None
-            result = await style_one.Creat(info = character, name = self.enc.player.nickname, translator = self.translator, adapt = self.adapt, hide = self.hide, color = color, art = character_iamge, uid = uid).start()
+            character_iamge = (
+                self.character_image.get(str(character.id)) if self.character_image else None
+            )
+            result = await style_one.Creat(
+                info=character,
+                name=self.enc.player.nickname,
+                translator=self.translator,
+                adapt=self.adapt,
+                hide=self.hide,
+                color=color,
+                art=character_iamge,
+                uid=uid,
+            ).start()
 
             if self.save:
-                await asyncio.gather(*[save_banner(uid, key["card"], key["name"]) for key in result])
+                await asyncio.gather(
+                    *[save_banner(uid, key["card"], key["name"]) for key in result]
+                )
 
             data = {
                 "uid": uid,
                 "name": self.enc.player.nickname,
                 "lang": self.lang,
-                "card": [result]
+                "card": [result],
             }
-                    
+
             return ENCardResult.EnkaNetworkCard(**data)
-    
-    async def update_assets(self, path = None):
+
+    async def update_assets(self, path=None):
         client = EnkaNetworkAPI()
         async with client:
             await client.update_assets()
