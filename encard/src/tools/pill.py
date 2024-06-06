@@ -3,6 +3,7 @@ from pathlib import Path
 from io import BytesIO
 from collections import namedtuple
 from math import sqrt
+from fake_useragent import UserAgent
 
 import PIL
 import aiohttp,re,random
@@ -205,6 +206,7 @@ async def get_dowload_img(link,size = None, thumbnail_size = None):
             headers_p = {
                 "referer": "https://www.pixiv.net/",
             }
+        headers_p["User-Agent"] = UserAgent().random
         async with aiohttp.ClientSession(headers=headers_p) as session, session.get(link) as r:
             try:
                 image = await r.read()
