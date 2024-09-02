@@ -213,7 +213,11 @@ class ENCard:
             if isinstance(self.color, dict):
                 self.color = await get_color_user(self.color)
 
-            character = next(c for c in self.enc.characters if str(c.id) == str(self.character_id))
+            character = next((c for c in self.enc.characters if str(c.id) == str(self.character_id)), None)
+            if character is None:
+                msg = f"Cant find character with id {self.character_id}, available ids: {', '.join(str(c.id) for c in self.enc.characters)}"
+                raise ValueError(msg)
+
             color = self.color.get(str(character.id)) if self.color else None
             character_iamge = (
                 self.character_image.get(str(character.id)) if self.character_image else None
