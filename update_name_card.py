@@ -12,17 +12,17 @@ async def fetch_data(url):
                 return None
 
 
-link_image = "https://gi.yatta.top/api/assets/UI/namecard/{image}.png"
-link_icon = "https://gi.yatta.top/api/assets/UI/namecard/{icon}.png"
-default_icon = "https://gi.yatta.top/api/assets/UI/namecard/UI_NameCardIcon_0.png"
-default_image = "https://gi.yatta.top/api/assets/UI/namecard/UI_NameCardPic_0_P.png"
+link_image = "https://gi.yatta.moe/api/assets/UI/namecard/{image}.png"
+link_icon = "https://gi.yatta.moe/api/assets/UI/namecard/{icon}.png"
+default_icon = "https://gi.yatta.moe/api/assets/UI/namecard/UI_NameCardIcon_0.png"
+default_image = "https://gi.yatta.moe/api/assets/UI/namecard/UI_NameCardPic_0_P.png"
 
 json_new = {}
 
 async def main():
-    charter_list = await fetch_data("https://gi.yatta.top/api/v2/ru/avatar?vh=42F2")
+    charter_list = await fetch_data("https://gi.yatta.moe/api/v2/ru/avatar?vh=42F2")
     for key in charter_list["data"]["items"]:
-        data_charter = await fetch_data(f"https://gi.yatta.top/api/v2/ru/avatar/{key}?vh=42F2")
+        data_charter = await fetch_data(f"https://gi.yatta.moe/api/v2/ru/avatar/{key}?vh=42F2")
         if data_charter["data"]["other"] is None:
             json_new[key] = {"id": 210001, "icon": default_icon, "image": default_image}       
             continue
