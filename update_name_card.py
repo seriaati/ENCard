@@ -12,10 +12,10 @@ async def fetch_data(url):
                 return None
 
 
-link_image = "https://gi.yatta.moe/api/assets/UI/namecard/{image}.png"
-link_icon = "https://gi.yatta.moe/api/assets/UI/namecard/{icon}.png"
-default_icon = "https://gi.yatta.moe/api/assets/UI/namecard/UI_NameCardIcon_0.png"
-default_image = "https://gi.yatta.moe/api/assets/UI/namecard/UI_NameCardPic_0_P.png"
+link_image = "https://gi.yatta.moe/assets/UI/namecard/{image}.png"
+link_icon = "https://gi.yatta.moe/assets/UI/namecard/{icon}.png"
+default_icon = "https://gi.yatta.moe/assets/UI/namecard/UI_NameCardIcon_0.png"
+default_image = "https://gi.yatta.moe/assets/UI/namecard/UI_NameCardPic_0_P.png"
 
 json_new = {}
 

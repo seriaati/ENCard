@@ -208,10 +208,8 @@ async def get_dowload_img(link,size = None, thumbnail_size = None):
             }
         headers_p["User-Agent"] = UserAgent().random
         async with aiohttp.ClientSession(headers=headers_p) as session, session.get(link) as r:
-            try:
-                image = await r.read()
-            finally:
-                await session.close()
+            r.raise_for_status()
+            image = await r.read()
     except:
         raise
     
