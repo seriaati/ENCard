@@ -136,7 +136,6 @@ class Creat:
                  
     async def get_background(self):
         name_card = await namecard_map.Get(self.info.id).image
-        print(name_card)
         name_card = await pill.get_dowload_img(name_card, size = (1342,639))
         
         font = await pill.get_font(21)
