@@ -304,8 +304,9 @@ class Creat:
         position_skills_level = [52,173,294]
 
         d = ImageDraw.Draw(self.background_skills)
+        skills = [s for s in self.info.skills if s.icon.filename not in {"Skill_S_Mona_02", "Skill_S_Ayaka_02"}]
 
-        for i, key in enumerate(self.info.skills):
+        for i, key in enumerate(skills):
             talants_icon = await pill.get_dowload_img(key.icon.url, size=(74, 74))
             self.background_skills.alpha_composite(talants_icon, (position_skills_icon[i], -5))
 
